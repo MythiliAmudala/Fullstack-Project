@@ -1,0 +1,100 @@
+/* General Styles */
+.container {
+    margin: 30px auto;
+    text-align: center;
+    max-width: 1200px;
+    padding: 20px;
+  }
+  
+  /* Map Styles */
+  .map-container {
+    height: 500px;
+    width: 100%;
+    border: 2px solid #ccc;
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  
+  /* Typography */
+  h4 {
+    font-size: 2rem;
+    color: #333;
+  }
+  
+  button {
+    padding: 10px 20px;
+    font-size: 16px;
+    cursor: pointer;
+  }
+  
+  /* Media Queries */
+  @media (max-width: 1200px) {
+    .map-container {
+      height: 450px;
+    }
+  
+    h4 {
+      font-size: 1.8rem;
+    }
+  }
+  
+  @media (max-width: 992px) {
+    .map-container {
+      height: 400px;
+    }
+  
+    h4 {
+      font-size: 1.5rem;
+    }
+  
+    button {
+      font-size: 14px;
+      padding: 8px 16px;
+    }
+  }
+  
+  @media (max-width: 768px) {
+    .map-container {
+      height: 350px;
+    }
+  
+    h4 {
+      font-size: 1.3rem;
+    }
+  
+    button {
+      font-size: 13px;
+      padding: 7px 14px;
+    }
+  }
+  
+  @media (max-width: 576px) {
+    .map-container {
+      height: 300px;
+    }
+  
+    h4 {
+      font-size: 1.2rem;
+    }
+  
+    button {
+      font-size: 12px;
+      padding: 6px 12px;
+    }
+  }
+  
+  @media (max-width: 400px) {
+    .map-container {
+      height: 250px;
+    }
+  
+    h4 {
+      font-size: 1rem;
+    }
+  
+    button {
+      font-size: 11px;
+      padding: 5px 10px;
+    }
+  }
+  
