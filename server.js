@@ -1,15 +1,14 @@
 const express = require('express')
-const app = express()
 const path = require('path')
 const { open } = require('sqlite')
 const sqlite3 = require('sqlite3')
 const bcrypt = require('bcryptjs')
 const jwt = require('jsonwebtoken')
 
-const dbPath = path.join(__dirname, 'mapDashboard.db')
-
+const app = express()
 app.use(express.json())
 
+const dbPath = path.join(__dirname, 'mapDashboard.db')
 let db = null
 
 //  Initialize Database and Server
@@ -17,7 +16,7 @@ const initializeDBandServer = async () => {
   try {
     db = await open({
       filename: dbPath,
-      driver: sqlite3.Database
+      driver: sqlite3.Database,
     })
 
     app.listen(3000, () => {
@@ -30,47 +29,40 @@ const initializeDBandServer = async () => {
 }
 
 //  JWT Authentication Middleware
-function authenticateToken(request, response, next) {
-  const jwtToken = request.headers?.authorization?.split(' ')[1]
+const authenticateToken = (req, res, next) => {
+  const jwtToken = req.headers?.authorization?.split(' ')[1]
 
   if (!jwtToken) {
-    return response.status(401).json({ error: 'Unauthorized. Missing JWT Token' })
+    return res.status(401).json({ error: 'Unauthorized. Missing JWT Token' })
   }
 
   jwt.verify(jwtToken, 'MY_SECRET_KEY', (error, payload) => {
     if (error) {
-      return response.status(403).json({ error: 'Forbidden. Invalid JWT Token' })
-    } else {
-      request.user = payload
-      next()
+      return res.status(403).json({ error: 'Forbidden. Invalid JWT Token' })
     }
+    req.user = payload
+    next()
   })
 }
 
 //  Login Endpoint
-app.post('/login', async (request, response) => {
-  const { username, password } = request.body
+app.post('/login', async (req, res) => {
+  const { username, password } = req.body
 
   try {
-    const selectUserQuery = `SELECT * FROM users WHERE username = ?`
-    const databaseUser = await db.get(selectUserQuery, [username])
+    const query = `SELECT * FROM users WHERE username = ?`
+    const user = await db.get(query, [username])
 
-    if (!databaseUser) {
-      return response.status(400).json({ error: 'Invalid username or password' })
+    if (!user || !(await bcrypt.compare(password, user.password))) {
+      return res.status(400).json({ error: 'Invalid username or password' })
     }
 
-    const isPasswordMatched = await bcrypt.compare(password, databaseUser.password)
-
-    if (isPasswordMatched) {
-      const payload = { id: databaseUser.id, username: databaseUser.username }
-      const jwtToken = jwt.sign(payload, 'MY_SECRET_KEY', { expiresIn: '1h' })
-      response.json({ jwtToken })
-    } else {
-      response.status(400).json({ error: 'Invalid username or password' })
-    }
+    const payload = { id: user.id, username: user.username }
+    const jwtToken = jwt.sign(payload, 'MY_SECRET_KEY', { expiresIn: '1h' })
+    res.json({ jwtToken })
   } catch (error) {
     console.error(error)
-    response.status(500).json({ error: 'Internal Server Error' })
+    res.status(500).json({ error: 'Internal Server Error' })
   }
 })
 
@@ -121,13 +113,12 @@ app.get('/', (req, res) => {
   res.send('Welcome to the Map Dashboard API')
 })
 
-//  Error Handler Middleware
+// Error Handler Middleware
 app.use((err, req, res, next) => {
   console.error(err.stack)
   res.status(500).json({ error: 'Something went wrong!' })
 })
 
-// Initialize DB and Server
 initializeDBandServer()
 
 module.exports = app
